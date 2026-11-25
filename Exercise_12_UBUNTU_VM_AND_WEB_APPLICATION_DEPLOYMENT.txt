@@ -1,35 +1,18 @@
-EXERCISE 12 - UBUNTU VM AND WEB APPLICATION DEPLOYMENT
-============================================================
-
-The uploaded lab record lists this exercise but does not provide its detailed execution commands.
-
-AWS EC2 DEPLOYMENT COMMANDS
-
-1. AWS Console -> EC2 -> Launch Instance.
-2. Select Ubuntu Server.
-3. Create/download key pair.
-4. Security Group: allow SSH 22 and HTTP 80.
-5. Launch instance.
-
-CONNECT FROM WINDOWS POWERSHELL
-ssh -i "YOUR_KEY.pem" ubuntu@YOUR_PUBLIC_IP
-
-UPDATE UBUNTU
+ssh -i "mynewKey.pem" ubuntu@ec2-98-84-173-93.compute-1.amazonaws.com
 sudo apt update
-sudo apt upgrade -y
+sudo apt install docker.io
+sudo apt install nano
+git clone https://github.com/archanareddyse/OLTRS.git
+ls
+cd OLTRS
+nano Dockerfile
 
-INSTALL JAVA
-sudo apt install openjdk-17-jdk -y
-java -version
+FROM tomcat:9.0
+RUN rm -rf /usr/local/tomcat/webapps/*
+COPY target/ticket-reservation-1.0-SNAPSHOT.war /usr/local/tomcat/webapps/ROOT.war
+EXPOSE 8080
+CMD ["catalina.sh", "run"]
 
-INSTALL TOMCAT
-sudo apt install tomcat10 -y
-sudo systemctl start tomcat10
-sudo systemctl enable tomcat10
-sudo systemctl status tomcat10
-
-DEPLOY WAR
-sudo cp yourapp.war /var/lib/tomcat10/webapps/
-
-OPEN
-http://YOUR_PUBLIC_IP:8080/yourapp
+sudo docker build -t oltrs-app .
+sudo docker run -d -p 8080:8080 --name oltrs-container oltrs-app
+sudo docker ps
